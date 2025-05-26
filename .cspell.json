@@ -1,0 +1,15 @@
+{
+  "language": "en,en-GB",
+  "words": [
+    "filtergraph",
+    "Juce"
+  ],
+  "ignorePaths": [
+    ".git",
+    ".github",
+    "lib",
+    "build",
+    "JuceLibraryCode",
+    "*.code-workspace"
+  ]
+}
