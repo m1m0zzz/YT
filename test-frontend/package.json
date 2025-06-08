@@ -1,0 +1,19 @@
+{
+  "name": "test-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/audioworklet": "^0.0.76",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "juce-framework-frontend-mirror": "^8.0.8-rc.1"
+  }
+}

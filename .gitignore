@@ -1,6 +1,9 @@
 Builds
 JuceLibraryCode
 
+test-frontend/public/*mp4
+test-frontend/public/*wav
+
 # Prerequisites
 *.d
 
