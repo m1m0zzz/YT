@@ -3,11 +3,13 @@ class MyWorkletProcessor extends AudioWorkletProcessor {
     super()
   }
 
-  process(
-    inputs: Float32Array[][],
-    outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
-  ) {
+  /**
+   * @param inputs {Float32Array[][]}
+   * @param outputs {Float32Array[][]}
+   * @param parameters {Record<string, Float32Array>}
+   * @returns
+   */
+  process(inputs, outputs, parameters) {
     const input = inputs[0]
     const output = outputs[0]
 
