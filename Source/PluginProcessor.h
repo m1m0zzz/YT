@@ -9,6 +9,9 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include <juce_dsp/juce_dsp.h>
+
+#include "RingBuffer.h"
 
 const int MAX_MIDI_NOTE_NUMS = 128;
 
@@ -59,6 +62,7 @@ public:
     juce::Point<int> getSavedSize() const;
     void setSavedSize(const juce::Point<int>& size);
 
+    RingBuffer<float> ringBuffer{ 48000 }; // TODO
 private:
     //juce::AudioProcessorValueTreeState parameters;
     juce::ValueTree state;

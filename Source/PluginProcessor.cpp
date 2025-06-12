@@ -96,6 +96,10 @@ void WebViewerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+
+    // TODO: set sampleRate
+    //DBG("samplesPerBlock");
+    //DBG(samplesPerBlock);
 }
 
 void WebViewerAudioProcessor::releaseResources()
@@ -133,8 +137,33 @@ bool WebViewerAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts
 void WebViewerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    //auto totalNumInputChannels  = getTotalNumInputChannels();
-    //auto totalNumOutputChannels = getTotalNumOutputChannels();
+    auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+    //auto outBlock = juce::dsp::AudioBlock<float>{ buffer }.getSubsetChannelBlock(0, (size_t)getTotalNumOutputChannels());
+    //DBG(outBlock.getNumSamples()); // 可変、ホストの blockSizeに依存
+    // web audio api のbuffer size はデフォルトで2048
+
+    //circularBuffer.read(0, outBlock);
+
+    auto* leftChannel = buffer.getWritePointer(0);
+    auto* rightChannel = buffer.getWritePointer(1);
+    //DBG('a ' << buffer.getNumSamples());
+    for (int i = 0; i < buffer.getNumSamples(); ++i) {
+        float buf;
+        const auto isNotEmpty = ringBuffer.pop(buf);
+        if (isNotEmpty) {
+            if (i == 0) {
+                DBG("pop " << buffer.getNumSamples());
+            }
+            leftChannel[i] = buf;
+            rightChannel[i] = buf;
+        }
+        else {
+            DBG("empty");
+            break;
+        }
+    }
 }
 
 //==============================================================================

@@ -1,15 +1,18 @@
-/**
- * @param element {HTMLAudioElement | HTMLVideoElement}
- * @param context {CanvasRenderingContext2D}
- */
+import { getNativeFunction } from "juce-framework-frontend-mirror"
+
 function loadVideo(
-  element,
-  context
+  element: HTMLAudioElement | HTMLVideoElement,
+  context: CanvasRenderingContext2D
 ) {
-  /** @type AudioContext */
-  let audioCtx
-  /** @type AudioWorkletNode */
-  // let workletNode
+  let audioCtx: AudioContext
+  // let workletNode: AudioWorkletNode
+
+  const hello = getNativeFunction('hello')
+  console.log(hello)
+  hello()
+
+  const pushBuffer = getNativeFunction('pushBuffer')
+  console.log(pushBuffer)
 
   const handlePlay = async () => {
     console.log('play video')
@@ -19,19 +22,32 @@ function loadVideo(
     }
     audioCtx = new AudioContext()
 
-    // console.log('waiting...')
-    // await audioCtx.audioWorklet.addModule('http://localhost:5173/src/processors.js')
-    // console.log('add module')
-    // workletNode = new AudioWorkletNode(
-    //   audioCtx,
-    //   'my-worklet-processor'
-    // )
+    const scriptNode = audioCtx.createScriptProcessor()
+    console.log(scriptNode.bufferSize)
+    scriptNode.onaudioprocess = (event) => {
+      const inputBuffer = event.inputBuffer
+      const outputBuffer = event.outputBuffer
+      const channelCount = inputBuffer.numberOfChannels
+      const sampleCount = inputBuffer.length
+      const numbersBuffer: number[][] = [[]]
+
+      for (let channel = 0; channel < channelCount; channel++) {
+        const inputData = inputBuffer.getChannelData(channel)
+        const outputData = outputBuffer.getChannelData(channel)
+        const ary: number[] = []
+        for (let i = 0; i < inputBuffer.length; i++) {
+          // outputData[i] = inputData[i] // bypass
+          ary.push(inputData[i])
+        }
+        numbersBuffer.push(ary)
+      }
+      pushBuffer(channelCount, sampleCount, numbersBuffer)
+    }
 
     const sourceNode = audioCtx.createMediaElementSource(element)
     const analyser = audioCtx.createAnalyser()
-    sourceNode.connect(analyser)
+    sourceNode.connect(analyser).connect(scriptNode).connect(audioCtx.destination)
     // sourceNode.connect(workletNode)
-    sourceNode.connect(audioCtx.destination)
 
     loadCanvas(context, analyser)
   }
@@ -39,11 +55,7 @@ function loadVideo(
   element.addEventListener('play', handlePlay)
 }
 
-/**
- * @param context {CanvasRenderingContext2D}
- * @param analyser {AnalyserNode}
- */
-function loadCanvas(context, analyser) {
+function loadCanvas(context: CanvasRenderingContext2D, analyser: AnalyserNode) {
   console.log('loadCanvas')
   const w = context.canvas.width
   const h = context.canvas.height
@@ -86,10 +98,10 @@ const onload = () => {
   const IFRAME = false
   console.log('onload')
 
-  let video
+  let video: HTMLVideoElement | null
   if (IFRAME) {
     const iframe = document.querySelector('iframe')
-    video = iframe.contentWindow.document.querySelector('video')
+    video = iframe?.contentWindow?.document.querySelector('video') || null
   } else {
     video = document.querySelector('video')
   }
