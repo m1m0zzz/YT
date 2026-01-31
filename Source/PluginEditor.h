@@ -17,7 +17,6 @@ const juce::String targetAddress = "https://www.youtube.com/";
 const juce::String jsCode = R"(
 function loadVideo(element, context) {
     let audioCtx;
-    // let workletNode: AudioWorkletNode
     const hello = getNativeFunction('hello');
     console.log(hello);
     hello();
@@ -30,29 +29,27 @@ function loadVideo(element, context) {
             return;
         }
         audioCtx = new AudioContext();
-        const scriptNode = audioCtx.createScriptProcessor();
+        const scriptNode = audioCtx.createScriptProcessor(2 ** 12);
         console.log(scriptNode.bufferSize);
         scriptNode.onaudioprocess = (event) => {
             const inputBuffer = event.inputBuffer;
             const outputBuffer = event.outputBuffer;
             const channelCount = inputBuffer.numberOfChannels;
             const sampleCount = inputBuffer.length;
-            const numbersBuffer = [[]];
+            // console.log(inputBuffer)
+            const arrays = [];
             for (let channel = 0; channel < channelCount; channel++) {
                 const inputData = inputBuffer.getChannelData(channel);
-                const outputData = outputBuffer.getChannelData(channel);
-                const ary = [];
-                for (let i = 0; i < inputBuffer.length; i++) {
-                    // outputData[i] = inputData[i]; // bypass
-                    ary.push(inputData[i]);
-                }
-                numbersBuffer.push(ary);
+                // const outputData = outputBuffer.getChannelData(channel)
+                // outputBuffer.copyToChannel(inputData, channel) // bypass
+                arrays.push(inputData);
             }
-            pushBuffer(channelCount, sampleCount, numbersBuffer);
+            pushBuffer(channelCount, sampleCount, arrays);
         };
         const sourceNode = audioCtx.createMediaElementSource(element);
         const analyser = audioCtx.createAnalyser();
-        sourceNode.connect(analyser).connect(scriptNode).connect(audioCtx.destination);
+        sourceNode.connect(analyser).connect(scriptNode);
+        // .connect(audioCtx.destination)
         // sourceNode.connect(workletNode)
         loadCanvas(context, analyser);
     };
@@ -135,6 +132,7 @@ const onload = () => {
     loadVideo(video, context);
 };
 window.addEventListener('load', onload);
+
 )";
 
 //==============================================================================
@@ -179,8 +177,8 @@ private:
                 //DBG(channelCount.toString());
                 //DBG(sampleCount.toString());
                 //const auto block = juce::dsp::AudioBlock<float>{ channelCount, sampleCount };
-                if (data.isArray()) {
-                    //DBG("data is array!");
+                if (data.isArray())
+                {
                     auto channels = *data.getArray();
                     for (const auto& channel : channels)
                     {
@@ -188,13 +186,19 @@ private:
                             auto buffers = *channel.getArray();
                             for (auto buffer : buffers)
                             {
-                                //block.add(buffer);
                                 safe_this->audioProcessor.ringBuffer.push(buffer);
                             }
                         }
                     }
 
                     DBG("push " << sampleCount.toString());
+                }
+                else if (const auto* object = data.getDynamicObject()) {
+                    DBG("{");
+                    for (auto prop : object->getProperties()) {
+                        DBG("  " << prop.name << ": " << prop.value.toString());
+                    }
+                    DBG("}");
                 }
                 else {
                     DBG("is not array!");

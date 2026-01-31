@@ -160,7 +160,7 @@ void WebViewerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
             rightChannel[i] = buf;
         }
         else {
-            DBG("empty");
+            //DBG("empty");
             break;
         }
     }

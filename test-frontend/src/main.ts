@@ -5,7 +5,6 @@ function loadVideo(
   context: CanvasRenderingContext2D
 ) {
   let audioCtx: AudioContext
-  // let workletNode: AudioWorkletNode
 
   const hello = getNativeFunction('hello')
   console.log(hello)
@@ -22,31 +21,29 @@ function loadVideo(
     }
     audioCtx = new AudioContext()
 
-    const scriptNode = audioCtx.createScriptProcessor()
+    const scriptNode = audioCtx.createScriptProcessor(2 ** 13)
     console.log(scriptNode.bufferSize)
     scriptNode.onaudioprocess = (event) => {
       const inputBuffer = event.inputBuffer
       const outputBuffer = event.outputBuffer
       const channelCount = inputBuffer.numberOfChannels
       const sampleCount = inputBuffer.length
-      const numbersBuffer: number[][] = [[]]
+      // console.log(inputBuffer)
+      const arrays: Float32Array[] = []
 
       for (let channel = 0; channel < channelCount; channel++) {
         const inputData = inputBuffer.getChannelData(channel)
-        const outputData = outputBuffer.getChannelData(channel)
-        const ary: number[] = []
-        for (let i = 0; i < inputBuffer.length; i++) {
-          // outputData[i] = inputData[i] // bypass
-          ary.push(inputData[i])
-        }
-        numbersBuffer.push(ary)
+        // const outputData = outputBuffer.getChannelData(channel)
+        // outputBuffer.copyToChannel(inputData, channel) // bypass
+        arrays.push(inputData)
       }
-      pushBuffer(channelCount, sampleCount, numbersBuffer)
+      pushBuffer(channelCount, sampleCount, arrays)
     }
 
     const sourceNode = audioCtx.createMediaElementSource(element)
     const analyser = audioCtx.createAnalyser()
-    sourceNode.connect(analyser).connect(scriptNode).connect(audioCtx.destination)
+    sourceNode.connect(analyser).connect(scriptNode)
+    // .connect(audioCtx.destination)
     // sourceNode.connect(workletNode)
 
     loadCanvas(context, analyser)
