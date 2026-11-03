@@ -25,7 +25,6 @@ function loadVideo(
     console.log(scriptNode.bufferSize)
     scriptNode.onaudioprocess = (event) => {
       const inputBuffer = event.inputBuffer
-      const outputBuffer = event.outputBuffer
       const channelCount = inputBuffer.numberOfChannels
       const sampleCount = inputBuffer.length
       // console.log(inputBuffer)
@@ -33,8 +32,8 @@ function loadVideo(
 
       for (let channel = 0; channel < channelCount; channel++) {
         const inputData = inputBuffer.getChannelData(channel)
-        // const outputData = outputBuffer.getChannelData(channel)
-        // outputBuffer.copyToChannel(inputData, channel) // bypass
+        // const outputData = event.outputBuffer.getChannelData(channel)
+        // event.outputBuffer.copyToChannel(inputData, channel) // bypass
         arrays.push(inputData)
       }
       pushBuffer(channelCount, sampleCount, arrays)
