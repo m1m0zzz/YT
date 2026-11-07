@@ -16,5 +16,13 @@
   },
   "dependencies": {
     "juce-framework-frontend-mirror": "^8.0.8-rc.1"
+  },
+  "engines": {
+    "node": ">=24.15.0",
+    "npm": ">=12.0.0"
+  },
+  "allowScripts": {
+    "esbuild": false,
+    "fsevents": false
   }
 }
